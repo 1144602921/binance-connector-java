@@ -1,3 +1,4 @@
+# Jetty 12.1 WebSocket test compatibility migration
 name: Apply Jetty 12 websocket test compatibility fixes
 
 on:
