@@ -15,7 +15,6 @@ package com.binance.connector.client.spot.websocket.api.api;
 import com.binance.connector.client.common.ApiException;
 import com.binance.connector.client.common.configuration.SignatureConfiguration;
 import com.binance.connector.client.common.websocket.adapter.ConnectionWrapper;
-
 import com.binance.connector.client.common.websocket.configuration.WebSocketClientConfiguration;
 import com.binance.connector.client.common.websocket.dtos.ApiRequestWrapperDTO;
 import com.binance.connector.client.common.websocket.dtos.BaseRequestDTO;
@@ -29,15 +28,14 @@ import com.binance.connector.client.spot.websocket.api.model.Symbols;
 import com.binance.connector.client.spot.websocket.api.model.TimeResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
-
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,11 +67,8 @@ public class GeneralApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(URI.class));
         sessionMock = Mockito.mock(Session.class);
-
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
 
         sessionCompletableFuture.complete(sessionMock);
         ConnectionWrapper connectionWrapper =
@@ -104,8 +99,7 @@ public class GeneralApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<ExchangeInfoRequest, ExchangeInfoResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         ExchangeInfoRequest params = requestWrapperDTO.getParams();
@@ -132,8 +126,7 @@ public class GeneralApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<BaseRequestDTO, BaseResponseDTO> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         BaseRequestDTO params = requestWrapperDTO.getParams();
@@ -159,8 +152,7 @@ public class GeneralApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<BaseRequestDTO, TimeResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         BaseRequestDTO params = requestWrapperDTO.getParams();
@@ -190,11 +182,10 @@ public class GeneralApiTest {
     public void serverShutdownPendingMessagesTest() {
         api.time();
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<WriteCallback> writeCallbackArgumentCaptor = ArgumentCaptor.forClass(WriteCallback.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
+        ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
 
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), writeCallbackArgumentCaptor.capture());
-        writeCallbackArgumentCaptor.getValue().writeSuccess();
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), callbackArgumentCaptor.capture());
+        callbackArgumentCaptor.getValue().succeeded();
 
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");
         // Should call connect only once for initial connect, reconnect should be pending as there is a pending request
@@ -210,11 +201,10 @@ public class GeneralApiTest {
     public void multipleServerShutdownPendingMessagesTest() {
         api.time();
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<WriteCallback> writeCallbackArgumentCaptor = ArgumentCaptor.forClass(WriteCallback.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
+        ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
 
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), writeCallbackArgumentCaptor.capture());
-        writeCallbackArgumentCaptor.getValue().writeSuccess();
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), callbackArgumentCaptor.capture());
+        callbackArgumentCaptor.getValue().succeeded();
 
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");
