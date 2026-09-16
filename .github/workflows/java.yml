@@ -1,6 +1,7 @@
 name: Java Main Workflow
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master, dev, 'jetty-*' ]
   pull_request:
