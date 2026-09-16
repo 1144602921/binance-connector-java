@@ -15,7 +15,6 @@ package com.binance.connector.client.derivatives_trading_coin_futures.websocket.
 import com.binance.connector.client.common.ApiException;
 import com.binance.connector.client.common.configuration.SignatureConfiguration;
 import com.binance.connector.client.common.websocket.adapter.ConnectionWrapper;
-
 import com.binance.connector.client.common.websocket.configuration.WebSocketClientConfiguration;
 import com.binance.connector.client.common.websocket.dtos.RequestWrapperDTO;
 import com.binance.connector.client.derivatives_trading_coin_futures.websocket.api.model.AccountInformationRequest;
@@ -24,13 +23,12 @@ import com.binance.connector.client.derivatives_trading_coin_futures.websocket.a
 import com.binance.connector.client.derivatives_trading_coin_futures.websocket.api.model.FuturesAccountBalanceResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
-
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,12 +61,9 @@ public class AccountApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(URI.class));
         sessionMock = Mockito.mock(Session.class);
 
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
-        
         sessionCompletableFuture.complete(sessionMock);
         ConnectionWrapper connectionWrapper =
                 new ConnectionWrapper(clientConfiguration, webSocketClient);
@@ -99,8 +94,7 @@ public class AccountApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<AccountInformationRequest, AccountInformationResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         AccountInformationRequest params = requestWrapperDTO.getParams();
@@ -134,8 +128,7 @@ public class AccountApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<FuturesAccountBalanceRequest, FuturesAccountBalanceResponse>
                 requestWrapperDTO = callArgumentCaptor.getValue();
         FuturesAccountBalanceRequest params = requestWrapperDTO.getParams();
