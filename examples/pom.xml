@@ -13,7 +13,6 @@
         <developerConnection>scm:git:git@github.com:openapitools/openapi-generator.git</developerConnection>
         <url>https://github.com/openapitools/openapi-generator</url>
     </scm>
-
     <modules>
         <module>algo</module>
         <module>alpha</module>
@@ -44,7 +43,6 @@
         <module>wallet</module>
         <!--    add_module    -->
     </modules>
-    
     <licenses>
         <license>
             <name>Unlicense</name>
@@ -52,7 +50,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
     <build>
         <plugins>
             <plugin>
@@ -65,10 +62,10 @@
                     <maxmem>512m</maxmem>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
-                        <arg>-J-Xss4m</arg><!-- Compiling the generated JSON.java file may require larger stack size. -->
+                        <arg>-J-Xss4m</arg>
                     </compilerArgs>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -82,7 +79,6 @@
                     <style>AOSP</style>
                     <reflowLongStrings>true</reflowLongStrings>
                   </googleJavaFormat>
-
                   <removeUnusedImports/>
                   <importOrder/>
                 </java>
@@ -119,7 +115,6 @@
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <id>sign-artifacts</id>
@@ -143,9 +138,8 @@
             </build>
         </profile>
     </profiles>
-
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spotless.version>2.44.4</spotless.version>

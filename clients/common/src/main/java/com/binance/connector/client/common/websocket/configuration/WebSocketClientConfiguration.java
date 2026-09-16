@@ -1,8 +1,8 @@
 package com.binance.connector.client.common.websocket.configuration;
 
 import com.binance.connector.client.common.configuration.ClientConfiguration;
+import org.eclipse.jetty.client.Authentication;
 import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.api.Authentication;
 
 public class WebSocketClientConfiguration extends ClientConfiguration implements Cloneable {
     /** Base URL */

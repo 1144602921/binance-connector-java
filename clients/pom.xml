@@ -70,12 +70,8 @@
                     <execution>
                         <id>sign-artifacts</id>
                         <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                        <configuration>
-                            <signer>bc</signer>
-                        </configuration>
+                        <goals><goal>sign</goal></goals>
+                        <configuration><signer>bc</signer></configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -84,9 +80,7 @@
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>0.8.0</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                </configuration>
+                <configuration><publishingServerId>central</publishingServerId></configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -98,11 +92,10 @@
                     <maxmem>512m</maxmem>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
-                        <arg>-J-Xss4m
-                        </arg><!-- Compiling the generated JSON.java file may require larger stack size. -->
+                        <arg>-J-Xss4m</arg>
                     </compilerArgs>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -112,14 +105,10 @@
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
+                        <goals><goal>enforce</goal></goals>
                         <configuration>
                             <rules>
-                                <requireMavenVersion>
-                                    <version>2.2.0</version>
-                                </requireMavenVersion>
+                                <requireMavenVersion><version>2.2.0</version></requireMavenVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -131,17 +120,13 @@
                 <version>2.22.2</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <property>
-                            <name>loggerPath</name>
-                            <value>conf/log4j.properties</value>
-                        </property>
+                        <property><name>loggerPath</name><value>conf/log4j.properties</value></property>
                     </systemPropertyVariables>
                     <argLine>-Xms512m -Xmx1500m</argLine>
                     <parallel>methods</parallel>
                     <threadCount>10</threadCount>
                 </configuration>
                 <dependencies>
-                    <!--Custom provider and engine for Junit 5 to surefire-->
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
@@ -155,29 +140,18 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        </configuration>
+                        <goals><goal>copy-dependencies</goal></goals>
+                        <configuration><outputDirectory>${project.build.directory}/lib</outputDirectory></configuration>
                     </execution>
                 </executions>
             </plugin>
-            <!-- attach test jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
+                    <execution><goals><goal>test-jar</goal></goals></execution>
                 </executions>
-                <configuration>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -185,28 +159,12 @@
                 <version>3.5.0</version>
                 <executions>
                     <execution>
-                        <id>add_sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/main/java</source>
-                            </sources>
-                        </configuration>
+                        <id>add_sources</id><phase>generate-sources</phase><goals><goal>add-source</goal></goals>
+                        <configuration><sources><source>src/main/java</source></sources></configuration>
                     </execution>
                     <execution>
-                        <id>add_test_sources</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/test/java</source>
-                            </sources>
-                        </configuration>
+                        <id>add_test_sources</id><phase>generate-test-sources</phase><goals><goal>add-test-source</goal></goals>
+                        <configuration><sources><source>src/test/java</source></sources></configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -214,16 +172,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.6.3</version>
-                <configuration>
-                    <doclint>none</doclint>
-                </configuration>
+                <configuration><doclint>none</doclint></configuration>
                 <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
+                    <execution><id>attach-javadocs</id><goals><goal>jar</goal></goals></execution>
                 </executions>
             </plugin>
             <plugin>
@@ -231,18 +182,9 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.3.0</version>
                 <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
+                    <execution><id>attach-sources</id><goals><goal>jar-no-fork</goal></goals></execution>
                 </executions>
             </plugin>
-            <!-- Use spotless plugin to automatically format code, remove unused import, etc
-                 To apply changes directly to the file, run `mvn spotless:apply`
-                 Ref: https://github.com/diffplug/spotless/tree/main/plugin-maven
-            -->
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
@@ -254,10 +196,8 @@
                             <style>AOSP</style>
                             <reflowLongStrings>true</reflowLongStrings>
                         </googleJavaFormat>
-
                         <removeUnusedImports/>
                         <importOrder/>
-
                     </java>
                 </configuration>
             </plugin>
@@ -281,12 +221,9 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <?m2e execute onConfiguration,onIncremental?>
                         <id>validate</id>
                         <phase>validate</phase>
-                        <goals>
-                            <goal>checkstyle</goal>
-                        </goals>
+                        <goals><goal>checkstyle</goal></goals>
                     </execution>
                 </executions>
             </plugin>
@@ -294,109 +231,31 @@
     </build>
 
     <dependencies>
-        <!-- @Nullable annotation -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-            <version>${okhttp-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.gsonfire</groupId>
-            <artifactId>gson-fire</artifactId>
-            <version>${gson-fire-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3-version}</version>
-        </dependency>
-        <!-- Bean Validation API support -->
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-            <version>${beanvalidation-version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Bean Validation Impl. used to perform BeanValidation -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>7.0.5.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>${jakarta-annotation-version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>jackson-databind-nullable</artifactId>
-            <version>${jackson-databind-nullable-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind-version}</version>
-        </dependency>
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
-            <version>${junit-platform-runner.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.15.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.skyscreamer</groupId>
-            <artifactId>jsonassert</artifactId>
-            <version>2.0-rc1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk18on</artifactId>
-            <version>1.84</version>
-        </dependency>
+        <dependency><groupId>com.google.code.findbugs</groupId><artifactId>jsr305</artifactId><version>3.0.2</version></dependency>
+        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>${okhttp-version}</version></dependency>
+        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>logging-interceptor</artifactId><version>${okhttp-version}</version></dependency>
+        <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>${gson-version}</version></dependency>
+        <dependency><groupId>io.gsonfire</groupId><artifactId>gson-fire</artifactId><version>${gson-fire-version}</version></dependency>
+        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId><version>${commons-lang3-version}</version></dependency>
+        <dependency><groupId>jakarta.validation</groupId><artifactId>jakarta.validation-api</artifactId><version>${beanvalidation-version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-validator</artifactId><version>7.0.5.Final</version></dependency>
+        <dependency><groupId>jakarta.annotation</groupId><artifactId>jakarta.annotation-api</artifactId><version>${jakarta-annotation-version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>org.openapitools</groupId><artifactId>jackson-databind-nullable</artifactId><version>${jackson-databind-nullable-version}</version></dependency>
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId><version>${jackson-databind-version}</version></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-engine</artifactId><version>${junit-version}</version><scope>test</scope></dependency>
+        <dependency><groupId>org.junit.platform</groupId><artifactId>junit-platform-runner</artifactId><version>${junit-platform-runner.version}</version><scope>test</scope></dependency>
+        <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>5.15.2</version><scope>test</scope></dependency>
+        <dependency><groupId>org.skyscreamer</groupId><artifactId>jsonassert</artifactId><version>2.0-rc1</version><scope>test</scope></dependency>
+        <dependency><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId><version>1.19.0</version></dependency>
+        <dependency><groupId>org.bouncycastle</groupId><artifactId>bcpkix-jdk18on</artifactId><version>1.84</version></dependency>
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-jetty-client</artifactId>
+            <artifactId>jetty-websocket-jetty-client</artifactId>
             <version>${jetty.version}</version>
         </dependency>
     </dependencies>
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <gson-fire-version>1.9.0</gson-fire-version>
@@ -412,6 +271,6 @@
         <jsr311-api-version>1.1.1</jsr311-api-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spotless.version>2.44.4</spotless.version>
-        <jetty.version>11.0.26</jetty.version>
+        <jetty.version>12.1.10</jetty.version>
     </properties>
 </project>
