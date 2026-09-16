@@ -49,15 +49,14 @@ import org.bouncycastle.crypto.CryptoException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.util.component.LifeCycle;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.Session.Listener.AutoDemanding;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
-public class ConnectionWrapper implements WebSocketListener, ConnectionInterface {
+public class ConnectionWrapper implements AutoDemanding, ConnectionInterface {
     private static final Logger log = Logger.getLogger(ConnectionWrapper.class.getName());
 
     public static final int WAIT_TIME = 5;
@@ -214,15 +213,15 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
 
         beforeConnect();
 
-        ClientUpgradeRequest clientUpgradeRequest = null;
-        if (configuration.getCompression()) {
-            clientUpgradeRequest = new ClientUpgradeRequest();
-            clientUpgradeRequest.addExtensions("permessage-deflate");
-        }
-
         // Connect the client EndPoint to the server.
-        CompletableFuture<Session> clientSessionPromise =
-                webSocketClient.connect(this, serverURI, clientUpgradeRequest);
+        CompletableFuture<Session> clientSessionPromise;
+        if (configuration.getCompression()) {
+            ClientUpgradeRequest clientUpgradeRequest = new ClientUpgradeRequest(serverURI);
+            clientUpgradeRequest.addExtensions("permessage-deflate");
+            clientSessionPromise = webSocketClient.connect(this, clientUpgradeRequest);
+        } else {
+            clientSessionPromise = webSocketClient.connect(this, serverURI);
+        }
         Session session = clientSessionPromise.join();
 
         if (callback != null) {
@@ -251,7 +250,7 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
     }
 
     public void onWebSocketPing(ByteBuffer payload) {
-        this.session.getRemote().sendPong(payload, WriteCallback.NOOP);
+        this.session.sendPong(payload, Callback.NOOP);
     }
 
     public Map<String, RequestWrapperDTO> getPendingRequest() {
@@ -297,31 +296,37 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
     }
 
     @Override
-    public void onWebSocketClose(int statusCode, String reason) {
-        if (statusCode == StatusCode.NORMAL) {
-            log.info("received websocket close, code: " + statusCode + " reason: " + reason);
-            return;
-        }
-        if (statusCode == StatusCode.NO_CLOSE) {
-            Collection<Session> openSessions = webSocketClient.getOpenSessions();
-            for (Session openSession : openSessions) {
-                // old session being closed, it's expected
-                if (oldSession != null && !oldSession.isOpen() && openSession.equals(oldSession)) {
-                    log.info("old session closing, code: " + statusCode + " reason: " + reason);
-                    return;
+    public void onWebSocketClose(int statusCode, String reason, Callback callback) {
+        try {
+            if (statusCode == StatusCode.NORMAL) {
+                log.info("received websocket close, code: " + statusCode + " reason: " + reason);
+                return;
+            }
+            if (statusCode == StatusCode.NO_CLOSE) {
+                Collection<Session> openSessions = webSocketClient.getOpenSessions();
+                for (Session openSession : openSessions) {
+                    // old session being closed, it's expected
+                    if (oldSession != null && !oldSession.isOpen() && openSession.equals(oldSession)) {
+                        log.info("old session closing, code: " + statusCode + " reason: " + reason);
+                        return;
+                    }
                 }
             }
-        }
-        log.log(
-                Level.SEVERE,
-                "received websocket close, code: " + statusCode + " reason: " + reason);
-        if (canReconnect) {
-            try {
-                connect();
-            } catch (Exception e) {
-                log.log(Level.SEVERE, "Error while trying to reconnect", e);
+            log.log(
+                    Level.SEVERE,
+                    "received websocket close, code: " + statusCode + " reason: " + reason);
+            if (canReconnect) {
+                try {
+                    connect();
+                } catch (Exception e) {
+                    log.log(Level.SEVERE, "Error while trying to reconnect", e);
+                }
             }
+        } catch (Throwable e) {
+            callback.fail(e);
+            return;
         }
+        callback.succeed();
     }
 
     public void send(RequestWrapperDTO request) {
@@ -372,20 +377,13 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
     }
 
     public void send(RequestWrapperDTO request, Session session) {
-        session.getRemote()
-                .sendString(
-                        gson.toJson(request),
-                        new WriteCallback() {
-                            @Override
-                            public void writeFailed(Throwable x) {
-                                throw new ApiException(x);
-                            }
-
-                            @Override
-                            public void writeSuccess() {
-                                ConnectionWrapper.this.pendingRequest.put(request.getId(), request);
-                            }
-                        });
+        session.sendText(
+                gson.toJson(request),
+                Callback.from(
+                        () -> ConnectionWrapper.this.pendingRequest.put(request.getId(), request),
+                        x -> {
+                            throw new ApiException(x);
+                        }));
     }
 
     public Long getTimestamp() {
@@ -437,7 +435,7 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
     }
 
     @Override
-    public void onWebSocketConnect(Session session) {
+    public void onWebSocketOpen(Session session) {
         this.session = session;
         // No need to demand here, because this endpoint is auto-demanding.
     }
@@ -525,7 +523,7 @@ public class ConnectionWrapper implements WebSocketListener, ConnectionInterface
     protected void afterConnect(Session session) {
         this.session = session;
         if (this.oldSession != null) {
-            this.oldSession.close(StatusCode.NORMAL, "close after reconnect", WriteCallback.NOOP);
+            this.oldSession.close(StatusCode.NORMAL, "close after reconnect", Callback.NOOP);
         }
         canReconnect = true;
         setReady(true);
