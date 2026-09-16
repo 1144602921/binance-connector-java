@@ -2,9 +2,9 @@ name: Java Main Workflow
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, dev, 'jetty-*' ]
   pull_request:
-    branches: [ master, rc-* ]
+    branches: [ master, dev, rc-* ]
 
 jobs:
   detect-targets:
@@ -19,31 +19,30 @@ jobs:
 
       - name: Detect modified targets
         id: filter
+        shell: bash
         run: |
+          set -euo pipefail
           MODIFIED_TARGETS=()
-          
-          # Ensure HEAD^ exists
           if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
             BASE_COMMIT="HEAD^"
           else
-            BASE_COMMIT=$(git rev-list --max-parents=0 HEAD) # First commit
+            BASE_COMMIT=$(git rev-list --max-parents=0 HEAD)
           fi
-          
-          # Check each client dynamically
-          while read client; do
+          while read -r client; do
             CLIENT_NAME=$(basename "$client")
             if ! git diff --quiet "$BASE_COMMIT" HEAD -- "$client"; then
               echo "Changes detected in $CLIENT_NAME"
               MODIFIED_TARGETS+=("$CLIENT_NAME")
             fi
-          done < <(find clients/* -type d -maxdepth 0)
-          
-          # Convert to JSON array format
-          MODIFIED_TARGETS_JSON=$(printf '%s\n' "${MODIFIED_TARGETS[@]}" | jq -R -s -c 'split("\n") | map(select(. != ""))')
-          
+          done < <(find clients -mindepth 1 -maxdepth 1 -type d | sort)
+          if ((${#MODIFIED_TARGETS[@]} == 0)); then
+            MODIFIED_TARGETS_JSON='[]'
+          else
+            MODIFIED_TARGETS_JSON=$(printf '%s\n' "${MODIFIED_TARGETS[@]}" | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          fi
           echo "Detected modified targets: $MODIFIED_TARGETS_JSON"
-          echo "modified_targets=$MODIFIED_TARGETS_JSON" >> $GITHUB_ENV
-          echo "::set-output name=modified_targets::$MODIFIED_TARGETS_JSON"
+          echo "modified_targets=$MODIFIED_TARGETS_JSON" >> "$GITHUB_OUTPUT"
+
   verify:
     runs-on: ubuntu-latest
     needs: detect-targets
@@ -54,12 +53,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
           cache-dependency-path: |
             clients/pom.xml
             examples/pom.xml
       - name: Validate modules
         run: |
+          set -euo pipefail
           mvn -f clients/pom.xml -pl common install -Dgpg.skip
-          mvn -f clients/pom.xml -pl `echo '${{ needs.detect-targets.outputs.modified_targets }}' | jq -r 'join(",")'` verify -Dgpg.skip
+          TARGETS=$(echo '${{ needs.detect-targets.outputs.modified_targets }}' | jq -r 'join(",")')
+          mvn -f clients/pom.xml -pl "$TARGETS" verify -Dgpg.skip
