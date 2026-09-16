@@ -1,0 +1,96 @@
+name: Jetty 12.1.10 full verification
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Migrate remaining Jetty 11 test API usages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for path in Path('clients').rglob('*.java'):
+              text = path.read_text(encoding='utf-8')
+              original = text
+
+              text = text.replace('import org.eclipse.jetty.websocket.api.RemoteEndpoint;\n', '')
+              text = text.replace(
+                  'Mockito.doReturn(sessionCompletableFuture)\n'
+                  '                .when(webSocketClient)\n'
+                  '                .connect(Mockito.any(), Mockito.any(), Mockito.any());',
+                  'Mockito.doReturn(sessionCompletableFuture)\n'
+                  '                .when(webSocketClient)\n'
+                  '                .connect(Mockito.any(), Mockito.any(URI.class));')
+              text = text.replace(
+                  '        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);\n'
+                  '        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();\n\n',
+                  '')
+              text = text.replace(
+                  '        RemoteEndpoint remote = sessionMock.getRemote();\n'
+                  '        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());',
+                  '        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());')
+
+              if text != original:
+                  if 'Mockito.any(URI.class)' in text and 'import java.net.URI;' not in text:
+                      marker = 'import java.net.'
+                      # URI is needed only in files whose connect mock was migrated.
+                      lines = text.splitlines(keepends=True)
+                      for i, line in enumerate(lines):
+                          if line.startswith('import java.net.'):
+                              lines.insert(i + 1, 'import java.net.URI;\n')
+                              break
+                      else:
+                          raise RuntimeError(f'Cannot add URI import to {path}')
+                      text = ''.join(lines)
+                  path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Check for remaining Jetty 11 WebSocket API usages
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIn --include='*.java' -E 'RemoteEndpoint|getRemote\(\)|WriteCallback|WebSocketListener' clients; then
+            echo 'Remaining Jetty 11 WebSocket API usage detected.'
+            exit 1
+          fi
+
+      - name: Full Maven clean test
+        run: mvn -f clients/pom.xml clean test -Dgpg.skip=true
+
+      - name: Commit verified migration and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/jetty1210-fix-and-verify.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add clients .github/workflows/jetty1210-fix-and-verify.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: complete Jetty 12.1.10 websocket test migration'
+          git push origin HEAD:dev
