@@ -185,7 +185,7 @@ public class GeneralApiTest {
         ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
 
         Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), callbackArgumentCaptor.capture());
-        callbackArgumentCaptor.getValue().succeeded();
+        callbackArgumentCaptor.getValue().succeed();
 
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");
         // Should call connect only once for initial connect, reconnect should be pending as there is a pending request
@@ -204,7 +204,7 @@ public class GeneralApiTest {
         ArgumentCaptor<Callback> callbackArgumentCaptor = ArgumentCaptor.forClass(Callback.class);
 
         Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), callbackArgumentCaptor.capture());
-        callbackArgumentCaptor.getValue().succeeded();
+        callbackArgumentCaptor.getValue().succeed();
 
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");
         connectionSpy.onWebSocketText("{\"event\":{\"e\":\"serverShutdown\",\"E\":1770123456789}}");

@@ -23,9 +23,9 @@ import com.binance.connector.client.spot.websocket.api.model.UserDataStreamEvent
 import com.binance.connector.client.spot.websocket.api.model.UserDataStreamSubscribeResponse;
 import com.binance.connector.client.spot.websocket.api.model.UserDataStreamUnsubscribeRequest;
 import com.binance.connector.client.spot.websocket.api.model.UserDataStreamUnsubscribeResponse;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -64,11 +64,8 @@ public class UserDataStreamApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(ClientUpgradeRequest.class));
         sessionMock = Mockito.mock(Session.class);
-
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
 
         sessionCompletableFuture.complete(sessionMock);
         ConnectionWrapper connectionWrapper =
@@ -96,8 +93,7 @@ public class UserDataStreamApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<BaseRequestDTO, UserDataStreamSubscribeResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         BaseRequestDTO params = requestWrapperDTO.getParams();
@@ -127,8 +123,7 @@ public class UserDataStreamApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<BaseRequestDTO, UserDataStreamUnsubscribeResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         BaseRequestDTO params = requestWrapperDTO.getParams();

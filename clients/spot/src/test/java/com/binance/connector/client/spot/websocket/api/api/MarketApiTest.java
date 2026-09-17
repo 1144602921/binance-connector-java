@@ -52,9 +52,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -85,11 +85,8 @@ public class MarketApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(ClientUpgradeRequest.class));
         sessionMock = Mockito.mock(Session.class);
-
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
 
         sessionCompletableFuture.complete(sessionMock);
         ConnectionWrapper connectionWrapper =
@@ -119,8 +116,7 @@ public class MarketApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<AvgPriceRequest, AvgPriceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         AvgPriceRequest params = requestWrapperDTO.getParams();
@@ -155,8 +151,7 @@ public class MarketApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<DepthRequest, DepthResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         DepthRequest params = requestWrapperDTO.getParams();
@@ -189,8 +184,7 @@ public class MarketApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<KlinesRequest, KlinesResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         KlinesRequest params = requestWrapperDTO.getParams();
@@ -221,8 +215,7 @@ public class MarketApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TickerRequest, TickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TickerRequest params = requestWrapperDTO.getParams();
@@ -256,8 +249,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Ticker24hrRequest, Ticker24hrResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Ticker24hrRequest params = requestWrapperDTO.getParams();
@@ -290,8 +282,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TickerBookRequest, TickerBookResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TickerBookRequest params = requestWrapperDTO.getParams();
@@ -324,8 +315,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TickerPriceRequest, TickerPriceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TickerPriceRequest params = requestWrapperDTO.getParams();
@@ -357,8 +347,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TickerTradingDayRequest, TickerTradingDayResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TickerTradingDayRequest params = requestWrapperDTO.getParams();
@@ -395,8 +384,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TradesAggregateRequest, TradesAggregateResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TradesAggregateRequest params = requestWrapperDTO.getParams();
@@ -427,8 +415,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TradesHistoricalRequest, TradesHistoricalResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TradesHistoricalRequest params = requestWrapperDTO.getParams();
@@ -459,8 +446,7 @@ public class MarketApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<TradesRecentRequest, TradesRecentResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         TradesRecentRequest params = requestWrapperDTO.getParams();
@@ -492,8 +478,7 @@ public class MarketApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<UiKlinesRequest, UiKlinesResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         UiKlinesRequest params = requestWrapperDTO.getParams();

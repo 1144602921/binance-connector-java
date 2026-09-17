@@ -30,9 +30,9 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,11 +63,8 @@ public class WebSocketStreamsApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(ClientUpgradeRequest.class));
         sessionMock = Mockito.mock(Session.class);
-
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
 
         sessionCompletableFuture.complete(sessionMock);
         StreamConnectionWrapper connectionWrapper =
@@ -98,8 +95,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, AggTradeResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -133,8 +129,7 @@ public class WebSocketStreamsApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, AllMarketRollingWindowTickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -164,8 +159,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, AllMiniTickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -195,8 +189,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, AvgPriceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -228,8 +221,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, BookTickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -260,8 +252,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, DiffBookDepthResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -296,8 +287,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, KlineResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -338,8 +328,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, KlineOffsetResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -370,8 +359,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, MiniTickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -404,8 +392,7 @@ public class WebSocketStreamsApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, PartialBookDepthResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -432,8 +419,7 @@ public class WebSocketStreamsApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, PartialBookDepthResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -465,8 +451,7 @@ public class WebSocketStreamsApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, RollingWindowTickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -497,8 +482,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, TickerResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();
@@ -528,8 +512,7 @@ public class WebSocketStreamsApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<Set<String>, TradeResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         Set<String> params = requestWrapperDTO.getParams();

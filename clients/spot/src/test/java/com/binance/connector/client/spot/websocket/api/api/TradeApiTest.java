@@ -68,9 +68,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -101,11 +101,8 @@ public class TradeApiTest {
         CompletableFuture<Session> sessionCompletableFuture = new CompletableFuture<>();
         Mockito.doReturn(sessionCompletableFuture)
                 .when(webSocketClient)
-                .connect(Mockito.any(), Mockito.any(), Mockito.any());
+                .connect(Mockito.any(), Mockito.any(ClientUpgradeRequest.class));
         sessionMock = Mockito.mock(Session.class);
-
-        RemoteEndpoint remoteEndpointMock = Mockito.mock(RemoteEndpoint.class);
-        Mockito.doReturn(remoteEndpointMock).when(sessionMock).getRemote();
 
         sessionCompletableFuture.complete(sessionMock);
         ConnectionWrapper connectionWrapper =
@@ -137,8 +134,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OpenOrdersCancelAllRequest, OpenOrdersCancelAllResponse>
                 requestWrapperDTO = callArgumentCaptor.getValue();
         OpenOrdersCancelAllRequest params = requestWrapperDTO.getParams();
@@ -168,8 +164,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderCancelRequest, OrderCancelResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderCancelRequest params = requestWrapperDTO.getParams();
@@ -204,8 +199,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderCancelReplaceRequest, OrderCancelReplaceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderCancelReplaceRequest params = requestWrapperDTO.getParams();
@@ -236,8 +230,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderListCancelRequest, OrderListCancelResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderListCancelRequest params = requestWrapperDTO.getParams();
@@ -269,8 +262,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderListPlaceRequest, OrderListPlaceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderListPlaceRequest params = requestWrapperDTO.getParams();
@@ -318,8 +310,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderListPlaceOcoRequest, OrderListPlaceOcoResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderListPlaceOcoRequest params = requestWrapperDTO.getParams();
@@ -366,8 +357,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderListPlaceOtoRequest, OrderListPlaceOtoResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderListPlaceOtoRequest params = requestWrapperDTO.getParams();
@@ -413,8 +403,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderListPlaceOtocoRequest, OrderListPlaceOtocoResponse>
                 requestWrapperDTO = callArgumentCaptor.getValue();
         OrderListPlaceOtocoRequest params = requestWrapperDTO.getParams();
@@ -444,8 +433,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderPlaceRequest, OrderPlaceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderPlaceRequest params = requestWrapperDTO.getParams();
@@ -477,8 +465,7 @@ public class TradeApiTest {
                 ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<OrderTestRequest, OrderTestResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         OrderTestRequest params = requestWrapperDTO.getParams();
@@ -507,8 +494,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<SorOrderPlaceRequest, SorOrderPlaceResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         SorOrderPlaceRequest params = requestWrapperDTO.getParams();
@@ -540,8 +526,7 @@ public class TradeApiTest {
                 callArgumentCaptor = ArgumentCaptor.forClass(RequestWrapperDTO.class);
         Mockito.verify(connectionSpy).innerSend(callArgumentCaptor.capture());
         ArgumentCaptor<String> sendArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        RemoteEndpoint remote = sessionMock.getRemote();
-        Mockito.verify(remote).sendString(sendArgumentCaptor.capture(), Mockito.any());
+        Mockito.verify(sessionMock).sendText(sendArgumentCaptor.capture(), Mockito.any());
         RequestWrapperDTO<SorOrderTestRequest, SorOrderTestResponse> requestWrapperDTO =
                 callArgumentCaptor.getValue();
         SorOrderTestRequest params = requestWrapperDTO.getParams();

@@ -48,7 +48,12 @@ public class StreamConnectionWrapper extends ConnectionWrapper
     public Map<String, StreamBlockingQueue<String>> subscribe(
             RequestWrapperDTO<Set<String>, Object> requestWrapperDTO) {
         HashMap<String, StreamBlockingQueue<String>> queueMap = new HashMap<>();
+        // Build a trimmed copy of params to normalize stream names
+        Set<String> trimmedParams = new HashSet<>();
         for (String subscription : requestWrapperDTO.getParams()) {
+            trimmedParams.add(subscription.trim());
+        }
+        for (String subscription : trimmedParams) {
             List<StreamBlockingQueue<String>> blockingQueueList;
             if (this.subscriptions.containsKey(subscription)) {
                 blockingQueueList = this.subscriptions.get(subscription);
@@ -74,7 +79,7 @@ public class StreamConnectionWrapper extends ConnectionWrapper
     }
 
     public void unsubscribe(StreamBlockingQueue queue) {
-        String operationId = queue.getOperationId();
+        String operationId = queue.getOperationId().trim();
         List<StreamBlockingQueue<String>> blockingQueues = subscriptions.get(operationId);
         blockingQueues.remove(queue);
 
@@ -105,9 +110,14 @@ public class StreamConnectionWrapper extends ConnectionWrapper
             if (id != null) {
                 JsonElement result = obj.get("result");
                 RequestWrapperDTO requestWrapperDTO = pendingRequest.get(id.getAsString());
+                if (requestWrapperDTO == null || result == null || result.isJsonNull()) {
+                    return;
+                }
+                if (requestWrapperDTO == null || result == null || result.isJsonNull()) {
+                    return;
+                }
                 Type responseType = requestWrapperDTO.getResponseType();
-                Object fromJson =
-                        result.isJsonNull() ? null : JSON.getGson().fromJson(result, responseType);
+                Object fromJson = JSON.getGson().fromJson(result, responseType);
                 pendingRequest.remove(id.getAsString());
                 requestWrapperDTO.getResponseCallback().complete(fromJson);
                 return;
@@ -119,7 +129,7 @@ public class StreamConnectionWrapper extends ConnectionWrapper
                 return;
             }
             List<StreamBlockingQueue<String>> blockingQueues =
-                    subscriptions.get(stream.getAsString());
+                    subscriptions.get(stream.getAsString().trim());
             if (blockingQueues == null || blockingQueues.isEmpty()) {
                 return;
             }
